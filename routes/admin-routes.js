@@ -3,8 +3,8 @@ const { check } = require("express-validator");
 const adminController = require("../controllers/admin-controllers");
 const router = express.Router();
 const multer = require("multer");
-
-const upload=multer();
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 router.post(
   "/add-product",
