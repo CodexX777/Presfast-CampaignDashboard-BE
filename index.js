@@ -11,15 +11,23 @@ dotenv.config();
 const port = process.env.PORT || 5001;
 
 app.use(bodyParser.json());
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type,Accept,Authorization"
+  );
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
+  next();
+});
 
 //add localhost to allow origin
-app.use(
-  cors({
-    origin: ["http://localhost:3000", process.env.FRONTEND_URL],
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "multipart/form-data"],
-  })
-);
+// app.use(
+//   cors({
+//     origin: ["http://localhost:3000", process.env.FRONTEND_URL],
+//     credentials: true,
+//   })
+// );
 
 //All the routes come here
 app.use("/api/auth", require("./routes/auth-routes"));
