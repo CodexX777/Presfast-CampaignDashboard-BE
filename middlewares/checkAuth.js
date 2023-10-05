@@ -15,16 +15,15 @@ module.exports = async (req, res, next) => {
       return next(new HttpError("Authentication failed.", 401));
     }
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const result = await pool.query(
-      "SELECT * FROM Users WHERE id=? AND email=?",
-      [decodedToken.userId, decodedToken.email]
-    );
-
-    if (result[0][0]?.status !== "activated") {
+    const existingUser = await Users.findOne({ email: decodedToken.email });
+    if (!existingUser) {
+      return next(new HttpError("User does not exist", 404));
+    }
+    if (existingUser.status === "deactivated") {
       return next(new HttpError("User is not activated", 422));
     }
 
-    if (result[0][0]?.role) {
+    if (existingUser.role) {
       req.userData = { ...decodedToken };
       next();
     } else {
