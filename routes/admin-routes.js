@@ -7,10 +7,17 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.post(
-  "/add-product",
+  "/add-presfast-product",
   upload.fields([{ name: "prodImages" }]),
   adminController.addPresfastProduct
 );
+
+router.post(
+  "/add-hungryjack-product",
+  upload.fields([{ name: "prodImages" }]),
+  adminController.addHungryJackProduct
+);
+
 router.post(
   "/add-user",
   [

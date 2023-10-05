@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const presfastProductSchema = new Schema({
   prodName: { type: String, required: true },
   unitPrice: { type: Number, required: true },
-  prodDesc: { type: String, required: true },
+  prodDesc: { type: String, required: false },
   prodImages: [{ type: String, required: true }],
   prodCategory: { type: String, required: true },
 });

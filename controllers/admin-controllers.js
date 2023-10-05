@@ -11,7 +11,7 @@ const { v4: uuidv4 } = require("uuid");
 const addPresfastProduct = async (req, res, next) => {
   const { prodName, unitPrice, prodDesc, category } = req.body;
   console.log(req.body);
-  console.log("req.files", typeof(req.files),req.files);
+  console.log("req.files", typeof req.files, req.files);
   const prodImagesNameList = [];
 
   const simpleFunc = async (file, index) => {
@@ -222,6 +222,42 @@ const updateProductPrice = async (req, res, next) => {
   }
 };
 
+const addHungryJackProduct = async (req, res, next) => {
+  const { prodName, prodDesc, prodCategory } = req.body;
+  console.log(req.body);
+  console.log("req.files", typeof req.files, req.files);
+  const prodImagesNameList = [];
+
+  const simpleFunc = async (file, index) => {
+    const fileName = uuidv4();
+    const fileExtension = file.mimetype.split("/")[1];
+    const fileFullName = `${fileName}.${fileExtension}`;
+    const res = await uploadImageToS3(file, fileFullName);
+    console.log(index, " - ", res);
+    prodImagesNameList.push(fileFullName);
+  };
+
+  for (let i = 0; i < req.files["prodImages"].length; i++) {
+    await simpleFunc(req.files["prodImages"][i], i);
+  }
+
+  try {
+    const product = new HungryJackProducts({
+      prodName,
+      prodDesc,
+      prodImages: prodImagesNameList,
+      prodCategory,
+    });
+    await product.save();
+
+    res.status(201).json({ message: "Product added successfully!" });
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Adding product failed.", 500));
+  }
+};
+
+exports.addHungryJackProduct=addHungryJackProduct;
 exports.resetPassword = resetPassword;
 exports.updateUserAccountStatus = updateUserAccountStatus;
 exports.updateUser = updateUser;
