@@ -7,9 +7,12 @@ const Users = require("../models/Users");
 const mongoose = require("mongoose");
 
 module.exports = async (req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return next();
+  }
   try {
+    console.log("token", req.headers);
     const token = req.headers.authorization.split(" ")[1];
-    console.log("token", token);
     if (!token) {
       return next(
         new HttpError("Authentication failed. No such user found", 404)
@@ -32,7 +35,7 @@ module.exports = async (req, res, next) => {
     if (result.status === "deactivated") {
       return next(new HttpError("User is not activated", 422));
     }
-    console.log("Result",result.role)
+    console.log("Result", result.role);
     if (result.role === "Admin") {
       console.log("result ", result);
       userData.isAdmin = true;
