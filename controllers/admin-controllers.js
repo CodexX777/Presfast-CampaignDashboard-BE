@@ -9,18 +9,23 @@ const uploadImageToS3 = require("../utils/s3ImageUpload");
 const { v4: uuidv4 } = require("uuid");
 
 const addPresfastProduct = async (req, res, next) => {
-  const { prodName, unitPrice, prodDesc, prodCategory } = req.body;
+  const { prodName, unitPrice, prodDesc, category } = req.body;
   console.log(req.body);
-  console.log("prodImages", req.files);
+  console.log("req.files", typeof(req.files),req.files);
   const prodImagesNameList = [];
-  req.files.forEach(async (file, index) => {
+
+  const simpleFunc = async (file, index) => {
     const fileName = uuidv4();
     const fileExtension = file.mimetype.split("/")[1];
     const fileFullName = `${fileName}.${fileExtension}`;
     const res = await uploadImageToS3(file, fileFullName);
     console.log(index, " - ", res);
     prodImagesNameList.push(fileFullName);
-  });
+  };
+
+  for (let i = 0; i < req.files["prodImages"].length; i++) {
+    await simpleFunc(req.files["prodImages"][i], i);
+  }
 
   try {
     const product = new PresfastProducts({
@@ -28,12 +33,13 @@ const addPresfastProduct = async (req, res, next) => {
       unitPrice,
       prodDesc,
       prodImages: prodImagesNameList,
-      prodCategory,
+      prodCategory: category,
     });
     await product.save();
 
     res.status(201).json({ message: "Product added successfully!" });
   } catch (error) {
+    console.log(error);
     return next(new HttpError("Adding product failed.", 500));
   }
 };

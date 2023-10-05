@@ -3,26 +3,32 @@ const HttpError = require("../models/http-error");
 const PresfastProducts = require("../models/PresfastProducts");
 const AWS = require("aws-sdk");
 const s3 = new AWS.S3();
-
 const getAllPresfastProducts = async (req, res, next) => {
   try {
     const products = await PresfastProducts.find();
 
-    const productsWithImages = products.map((product) => {
-      const images = product.prodImages.map(async (image, i) => {
-        const params = {
-          Bucket: process.env.CYCLIC_BUCKET_NAME,
-          Key: image,
-          Expires: 3600,
-        };
+    const productsWithImages = await Promise.all(
+      products.map(async (product) => {
+        const images = await Promise.all(
+          product.prodImages.map(async (image, i) => {
+            const params = {
+              Bucket: process.env.CYCLIC_BUCKET_NAME,
+              Key: image,
+              Expires: 3600,
+              ResponseContentDisposition: 'inline',
+            };
 
-        const url = await s3.getSignedUrl("getObject", params);
-        return url;
-      });
-      return { ...product._doc, prodImages: productsWithImages };
-    });
+            const url = await s3.getSignedUrl("getObject", params);
+            console.log("index name and url", i, image, url);
+            return url;
+          })
+        );
 
-    res.status(200).json({ products: products });
+        return { ...product._doc, prodImages: images };
+      })
+    );
+
+    res.status(200).json({ products: productsWithImages });
   } catch (error) {
     console.log(error);
     return next(new HttpError("Fetching products failed.", 500));
