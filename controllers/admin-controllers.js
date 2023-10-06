@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const HungryJackProducts = require("../models/HungryJacksProducts");
 const PresfastProducts = require("../models/PresfastProducts");
 const Users = require("../models/Users");
+const Stores = require("../models/Stores");
 const mongoose = require("mongoose");
 const uploadImageToS3 = require("../utils/s3ImageUpload");
 const { v4: uuidv4 } = require("uuid");
@@ -252,6 +253,65 @@ const addHungryJackProduct = async (req, res, next) => {
   }
 };
 
+const addStore = async (req, res, next) => {
+  const {
+    storeName,
+    storeNumber,
+    storeType,
+    jacksCafe,
+    storeAddress,
+    storeCity,
+    storePostCode,
+    storeRegion,
+    storeLandmark,
+  } = req.body;
+
+  try {
+    const store = new Stores({
+      storeName,
+      storeNumber,
+      storeType,
+      jacksCafe,
+      storeAddress,
+      storeCity,
+      storePostCode,
+      storeRegion,
+      storeLandmark: storeLandmark || "",
+    });
+    await store.save();
+
+    res.status(201).json({ message: "Store added successfully!" });
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Adding store failed.", 500));
+  }
+};
+
+const getAllStores = async (req, res, next) => {
+  try {
+    const storeCount = await Stores.countDocuments();
+
+    const storeData = await Stores.aggregate([
+      {
+        $project: {
+          _id: 1,
+          storeName: 1,
+          storeNumber: 1,
+          storeType: 1,
+          storeRegion: 1,
+        },
+      },
+    ]);
+
+    res.status(201).json({ data: { storeData, storeCount } });
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Fetching stores failed.", 500));
+  }
+};
+
+exports.addStore = addStore;
+exports.getAllStores = getAllStores;
 exports.addHungryJackProduct = addHungryJackProduct;
 exports.resetPassword = resetPassword;
 exports.updateUserAccountStatus = updateUserAccountStatus;

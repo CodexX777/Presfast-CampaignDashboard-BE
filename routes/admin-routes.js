@@ -18,10 +18,10 @@ router.post(
   adminController.addHungryJackProduct
 );
 
-router.post(
-  "/add-user",
-  adminController.addUser
-);
+router.post("/add-store", adminController.addStore);
+router.get("/get-stores", adminController.getAllStores);
+
+router.post("/add-user", adminController.addUser);
 router.put(
   "/update-user",
   [
