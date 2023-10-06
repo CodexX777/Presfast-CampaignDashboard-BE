@@ -31,10 +31,10 @@ const login = async (req, res, next) => {
       const error = new HttpError("Invalid credentials", 401);
       return next(error);
     }
-    if (existingUser.status === "deactivated") {
+    if (existingUser.status === "Suspended") {
       return next(
         new HttpError(
-          "User account is deactivated, please contact the admin",
+          "User account is Suspended, please contact the admin",
           401
         )
       );

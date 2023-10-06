@@ -45,14 +45,7 @@ const addPresfastProduct = async (req, res, next) => {
 };
 
 const addUser = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log(errors);
-    return next(
-      new HttpError("Invalid inputs passed, please check your data.", 422)
-    );
-  }
-  const { userName, password, email, phoneNo, role } = req.body;
+  const { name, password, email, phone, role, status } = req.body;
 
   const existingUser = await Users.findOne({ email: email });
   if (existingUser) {
@@ -65,13 +58,13 @@ const addUser = async (req, res, next) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new Users({
-      userName,
+      userName: name,
       password: hashedPassword,
       email,
-      phoneNo,
+      phoneNo: phone,
       role,
       avatarBg,
-      status: "activated",
+      status,
     });
     await user.save();
 
@@ -152,7 +145,9 @@ const updateUserAccountStatus = async (req, res, next) => {
 
     existingUser.status = status;
     await existingUser.save();
-    res.status(201).json({ message: "User deactivated successfully!" });
+    res
+      .status(201)
+      .json({ message: "User account status updated successfully!" });
   } catch (err) {
     console.log(err);
     return next(
@@ -257,7 +252,7 @@ const addHungryJackProduct = async (req, res, next) => {
   }
 };
 
-exports.addHungryJackProduct=addHungryJackProduct;
+exports.addHungryJackProduct = addHungryJackProduct;
 exports.resetPassword = resetPassword;
 exports.updateUserAccountStatus = updateUserAccountStatus;
 exports.updateUser = updateUser;

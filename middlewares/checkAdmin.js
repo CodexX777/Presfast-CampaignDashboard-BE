@@ -32,7 +32,7 @@ module.exports = async (req, res, next) => {
       return next(new HttpError("User not found", 404));
     }
 
-    if (result.status === "deactivated") {
+    if (result.status === "Suspended") {
       return next(new HttpError("User is not activated", 422));
     }
     console.log("Result", result.role);

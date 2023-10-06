@@ -20,13 +20,6 @@ router.post(
 
 router.post(
   "/add-user",
-  [
-    check("userName").exists(),
-    check("password").isLength({ min: 6 }),
-    check("email").isEmail(),
-    check("phoneNo").isString(),
-    check("role").isString(),
-  ],
   adminController.addUser
 );
 router.put(

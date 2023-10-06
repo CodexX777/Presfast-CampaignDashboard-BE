@@ -19,7 +19,7 @@ module.exports = async (req, res, next) => {
     if (!existingUser) {
       return next(new HttpError("User does not exist", 404));
     }
-    if (existingUser.status === "deactivated") {
+    if (existingUser.status === "Suspended") {
       return next(new HttpError("User is not activated", 422));
     }
 
