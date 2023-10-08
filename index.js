@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 //All the routes come here
 app.use("/api/auth", require("./routes/auth-routes"));
 app.use("/api/admin", require("./routes/admin-routes"));
-app.use("/api/items", checkAdmin, require("./routes/item-routes"));
+app.use("/api/items", require("./routes/item-routes"));
 //Error handling middleware
 app.use((req, res, next) => {
   const error = new HttpError("Could not find this route", 404);
@@ -52,8 +52,6 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "An unknown error occured!" });
 });
 
-// Old mongoURL
-// mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xvgrljc.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority
 mongoose
   .connect(
     `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ai4nhng.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`

@@ -4,7 +4,7 @@ const PresfastProducts = require("../models/PresfastProducts");
 const AWS = require("aws-sdk");
 const s3 = new AWS.S3();
 const HungryJackProducts = require("../models/HungryJacksProducts");
-
+const Stores = require("../models/Stores");
 const getAllPresfastProducts = async (req, res, next) => {
   try {
     const products = await PresfastProducts.find();
@@ -25,7 +25,6 @@ const getAllPresfastProducts = async (req, res, next) => {
             return url;
           })
         );
-
         return { ...product._doc, prodImages: images };
       })
     );
@@ -69,6 +68,52 @@ const getAllHungryJackProducts = async (req, res, next) => {
   }
 };
 
+const getStoreTypeOptions = async (req, res, next) => {
+  const { regionList } = req.body;
+
+  try {
+    const storeTypeOptions = await Promise.all(
+      regionList.map(async (region) => {
+        const newRegions = region.regions.map((reg) => {
+          return reg.value;
+        });
+        console.log(newRegions)
+        const options = await Stores.aggregate([
+          {
+            $match: {
+              storeRegion: { $in: newRegions },
+            },
+          },
+          {
+            $group: {
+              _id: "$keyNumber",
+              storeTypes: { $addToSet: "$storeType" },
+            },
+          },
+          {
+            $project: {
+              storeTypeOptions: "$storeTypes",
+              _id: 0,
+            },
+          },
+        ]);
+        console.log("options", options);
+
+        return {
+          keyNumber: region.keyNumber,
+          storeTypeOptions: options[0].storeTypeOptions,
+        };
+      })
+    );
+
+    res.status(200).json({ storeTypeOptions });
+  } catch (error) {
+    console.error(error);
+    return next(new HttpError("Fetching store type options failed.", 500));
+  }
+};
+
+
 // const getProduct = async (req, res, next) => {
 //   const productId = req.params.pid;
 //   try {
@@ -85,6 +130,8 @@ const getAllHungryJackProducts = async (req, res, next) => {
 //     return next(new HttpError("Fetching product failed.", 500));
 //   }
 // };
-exports.getAllHungryJackProducts=getAllHungryJackProducts;
+
+exports.getStoreTypeOptions=getStoreTypeOptions;
+exports.getAllHungryJackProducts = getAllHungryJackProducts;
 exports.getAllPresfastProducts = getAllPresfastProducts;
 // exports.getProduct = getProduct;
