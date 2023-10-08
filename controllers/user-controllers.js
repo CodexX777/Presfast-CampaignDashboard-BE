@@ -5,6 +5,9 @@ const AWS = require("aws-sdk");
 const s3 = new AWS.S3();
 const HungryJackProducts = require("../models/HungryJacksProducts");
 const Stores = require("../models/Stores");
+const mongoose = require("mongoose");
+const Campaigns = require("../models/Campaigns");
+
 const getAllPresfastProducts = async (req, res, next) => {
   try {
     const products = await PresfastProducts.find();
@@ -77,7 +80,7 @@ const getStoreTypeOptions = async (req, res, next) => {
         const newRegions = region.regions.map((reg) => {
           return reg.value;
         });
-        console.log(newRegions)
+        console.log(newRegions);
         const options = await Stores.aggregate([
           {
             $match: {
@@ -113,25 +116,55 @@ const getStoreTypeOptions = async (req, res, next) => {
   }
 };
 
+const scheduleCampaign = async (req, res, next) => {
+  const { campaignInfo, orderData } = req.body;
 
-// const getProduct = async (req, res, next) => {
-//   const productId = req.params.pid;
-//   try {
-//     const product = await pool.query(
-//       "SELECT * FROM Products WHERE product_id=?",
-//       [productId]
-//     );
-//     if (product[0].length === 0) {
-//       return next(new HttpError("Product not found.", 404));
-//     }
-//     res.status(200).json({ product: product[0][0] });
-//   } catch (error) {
-//     console.log(error);
-//     return next(new HttpError("Fetching product failed.", 500));
-//   }
-// };
+  const newOrderData = orderData.map((order) => {
+    return {
+      ...order,
+      presfastItem: {
+        _id: new mongoose.Types.ObjectId(order.presfastItem._id),
+      },
+      hjProduct: {
+        _id: new mongoose.Types.ObjectId(order.hjProduct._id),
+      },
+    };
+  });
 
-exports.getStoreTypeOptions=getStoreTypeOptions;
+  try {
+    const newCampaign = new Campaigns({
+      promotionName: campaignInfo.promotionName,
+      projectLead: campaignInfo.projectLead,
+      jobNumber: campaignInfo.jobNumber,
+      dueDate: campaignInfo.dueDate,
+      campaignLiveDate: campaignInfo.campaignLiveDate,
+      orderData: newOrderData,
+    });
+
+    await newCampaign.save();
+
+    res.status(201).json({ message: "Campaign scheduled successfully!" });
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Scheduling campaign failed.", 500));
+  }
+};
+const getSingleStoreData = async (req, res, next) => {
+  const { id } = req.query;
+
+  try {
+    const storeData = await Stores.findOne({
+      _id: new mongoose.Types.ObjectId(id),
+    });
+
+    res.status(201).json({ data: { storeData } });
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Fetching stores failed.", 500));
+  }
+};
+exports.getSingleStoreData = getSingleStoreData;
+exports.scheduleCampaign = scheduleCampaign;
+exports.getStoreTypeOptions = getStoreTypeOptions;
 exports.getAllHungryJackProducts = getAllHungryJackProducts;
 exports.getAllPresfastProducts = getAllPresfastProducts;
-// exports.getProduct = getProduct;
