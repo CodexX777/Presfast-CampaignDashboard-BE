@@ -16,6 +16,7 @@ const storeSchema = new mongoose.Schema({
   jacksCafe: {
     type: String,
     required: true,
+    default: "No",
   },
   storeAddress: {
     type: String,

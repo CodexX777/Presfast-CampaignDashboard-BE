@@ -10,7 +10,14 @@ const uploadImageToS3 = require("../utils/s3ImageUpload");
 const { v4: uuidv4 } = require("uuid");
 
 const addPresfastProduct = async (req, res, next) => {
-  const { prodName, unitPrice, prodDesc, category } = req.body;
+  const {
+    prodName,
+    unitPrice,
+    prodInitials,
+    prodDesc,
+    category,
+    prodFinishedSize,
+  } = req.body;
   console.log(req.body);
   console.log("req.files", typeof req.files, req.files);
   const prodImagesNameList = [];
@@ -33,6 +40,7 @@ const addPresfastProduct = async (req, res, next) => {
       prodName,
       unitPrice,
       prodDesc,
+      prodInitials,
       prodImages: prodImagesNameList,
       prodCategory: category,
     });

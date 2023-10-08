@@ -7,6 +7,8 @@ const HttpError = require("./models/http-error");
 const checkAdmin = require("./middlewares/checkAdmin");
 const mongoose = require("mongoose");
 //const checkAuth = require("./middlewares/checkAuth");
+const jsonToMongo = require("./utils/excelToMongo");
+
 dotenv.config();
 const port = process.env.PORT || 5001;
 
@@ -17,7 +19,10 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type,Accept,Authorization"
   );
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PATCH,DELETE,OPTIONS"
+  );
   next();
 });
 
@@ -47,11 +52,13 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "An unknown error occured!" });
 });
 
+// Old mongoURL
+// mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xvgrljc.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority
 mongoose
   .connect(
-    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xvgrljc.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ai4nhng.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
   )
-  .then(() => {
+  .then(async () => {
     console.log("Connected to mongoDB");
     app.listen(process.env.PORT || 5000);
   })
