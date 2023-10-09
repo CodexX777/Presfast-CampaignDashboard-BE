@@ -7,7 +7,7 @@ const campaignSchema = new Schema({
   //campaignInfo
   promotionName: { type: String, required: true },
   projectLead: { type: String, required: true },
-  jobNumber: { type: String, required: true },
+  jobNumber: { type: String, required: true, unique: true },
   dueDate: { type: String, required: true },
   campaignLiveDate: { type: String, required: true },
   //material Data
@@ -38,6 +38,7 @@ const campaignSchema = new Schema({
     },
   ],
   createdAt: { type: Date, default: Date.now },
+  status: { type: String, required: false, default: "Pending" },
 });
 
 module.exports = mongoose.model("Campaigns", campaignSchema);

@@ -163,6 +163,69 @@ const getSingleStoreData = async (req, res, next) => {
     return next(new HttpError("Fetching stores failed.", 500));
   }
 };
+
+const getRecentCampaignList = async (req, res, next) => {
+  try {
+    const campaignList = await Campaigns.aggregate([
+      {
+        $project: {
+          promotionName: 1,
+          projectLead: 1,
+          jobNumber: 1,
+          campaignLiveDate: 1,
+          status: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1, // Sorting by the 'createdAt' field in descending order (most recent first)
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+
+    res.status(201).json({ campaignList });
+  } catch (error) {
+    console.log(error);
+    return next(
+      new HttpError("Something went wrong, please try again later", 500)
+    );
+  }
+};
+
+const getAllCampaignList = async (req, res, next) => {
+  try {
+    const campaignList = await Campaigns.aggregate([
+      {
+        $project: {
+          promotionName: 1,
+          projectLead: 1,
+          jobNumber: 1,
+          campaignLiveDate: 1,
+          status: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1, // Sorting by the 'createdAt' field in descending order (most recent first)
+        },
+      },
+    ]);
+
+    res.status(201).json({ campaignList });
+  } catch (error) {
+    console.log(error);
+    return next(
+      new HttpError("Something went wrong, please try again later", 500)
+    );
+  }
+};
+exports.getAllCampaignList = getAllCampaignList;
+exports.getRecentCampaignList = getRecentCampaignList;
 exports.getSingleStoreData = getSingleStoreData;
 exports.scheduleCampaign = scheduleCampaign;
 exports.getStoreTypeOptions = getStoreTypeOptions;
