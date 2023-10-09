@@ -11,4 +11,5 @@ router.get("/store-data", userController.getSingleStoreData);
 router.post("/schedule-campaign", userController.scheduleCampaign);
 router.get("/get-recent-campaign-list", userController.getRecentCampaignList);
 router.get("/get-campaign-list", userController.getAllCampaignList);
+router.get("/getCampaign", userController.getCampaignData);
 module.exports = router;

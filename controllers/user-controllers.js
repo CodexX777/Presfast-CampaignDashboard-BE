@@ -224,6 +224,62 @@ const getAllCampaignList = async (req, res, next) => {
     );
   }
 };
+
+const getCampaignData = async (req, res, next) => {
+  const { campaignId } = req.query;
+
+  try {
+    const campaignData = await Campaigns.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(campaignId) } },
+      {
+        $unwind: {
+          path: "$orderData",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "presfastproducts", // Replace with the actual name of the 'presfastproducts' collection
+          localField: "orderData.presfastItem._id",
+          foreignField: "_id",
+          as: "orderData.presfastItem",
+        },
+      },
+      { $unwind: "$orderData.presfastItem" },
+      {
+        $lookup: {
+          from: "hungryjackproducts", // Replace with the actual name of the 'hungryjackproducts' collection
+          localField: "orderData.hjProduct._id",
+          foreignField: "_id",
+          as: "orderData.hjProduct",
+        },
+      },
+      { $unwind: "$orderData.hjProduct" },
+      {
+        $group: {
+          _id: "$_id",
+          promotionName: { $first: "$promotionName" },
+          projectLead: { $first: "$projectLead" },
+          jobNumber: { $first: "$jobNumber" },
+          dueDate: { $first: "$dueDate" },
+          campaignLiveDate: { $first: "$campaignLiveDate" },
+          createdAt: { $first: "$createdAt" },
+          status: { $first: "$status" },
+          orderData: { $push: "$orderData" },
+        },
+      },
+    ]);
+
+    res.status(201).json({ campaignData });
+  } catch (error) {
+    console.log(error);
+    return next(
+      new HttpError("Something went wrong, please try again later.", 500)
+    );
+  }
+};
+
+exports.getCampaignData = getCampaignData;
 exports.getAllCampaignList = getAllCampaignList;
 exports.getRecentCampaignList = getRecentCampaignList;
 exports.getSingleStoreData = getSingleStoreData;
